@@ -5,6 +5,7 @@ Light on control code
 | 2.0     | real time control, friendly-use, log record@hf
 | 2.1     | optimal user control interface, fix serial_port config saving bug
           | store log file in direction, add time interval setting up
+| 2.2     | close all led and hold terimal at the end @hf 1.31
 '''
 
 import serial
@@ -45,14 +46,14 @@ try:
 except IOError:
     config_file = open('light-on-ctrl.config', 'w') 
     config_file.write('# Here are hardware configure, please use # to commit\n')
-    config_file.write('# Only choose the first one config\n')
+    config_file.write('# Only choose last one config\n')
 
 else:
     config_line = config_file.readline()
     while(not config_line == ''):
         if(not config_line[0] == '#'):
             serial_port = config_line[0:-1] # only choose first one and remove '\n'
-            break
+            #break
             # Todo: add other case
         config_line = config_file.readline()
 
@@ -100,7 +101,9 @@ def lighton(interval_, csv_file, isTest):
                     break
                 line = data.readline()
                 if line == '':
-                    sys.exit()
+                    isCountinue = 0
+                    break;
+                    #sys.exit()
                 else:
                     isread = 1
                     line = line.strip()
@@ -116,7 +119,7 @@ def lighton(interval_, csv_file, isTest):
 ################################User Interface#############################################
 confirm = 'S'
 while( True ):
-    if confirm == 'S':  # Configure Serial port
+    if confirm == 'S' or confirm == 's':  # Configure Serial port
         print(serial_port)
         try:
             ser = serial.Serial(serial_port, 57600)
@@ -139,13 +142,13 @@ while( True ):
             # Todo: add no response handling
             print('If no flase, please check cable connection & board problem')
             isContinue = input('Is is correct(Y), or you want to retry(R) or quit(Q): ')
-            if isContinue == 'Y':
+            if isContinue == 'Y' or isContinue == 'y':
                 confirm = 'C'
-            elif isContinue == 'R':
+            elif isContinue == 'R' or isContinue == 'r':
                 confirm = 'S'
             else:
                 confirm = 'Q'
-    elif confirm == 'C': # Choose CSV file
+    elif confirm == 'C' or confirm == 'c': # Choose CSV file
         root = Tk()
         root.withdraw()
         root.csv_file =  filedialog.askopenfilename(
@@ -163,8 +166,8 @@ while( True ):
             print('load CSV succefully:' + csv_file)
             
             confirm = 'I'
-    elif confirm == 'I':
-        interval_temp = int(input('Please enter interval(1s~120s): '))
+    elif confirm == 'I' or confirm == 'i':
+        interval_temp = int(input('Please type interval(1s~120s, no unit): '))
         if interval_temp < 1:
             interval = 1
         elif interval_temp > 120:
@@ -173,21 +176,21 @@ while( True ):
             interval = interval_temp
         confirm = ''
 
-    elif confirm == 'T': # Test model
+    elif confirm == 'T' or confirm == 't': # Test model
         isTest = 1
         lighton(interval, csv_file, isTest)
         confirm = ''
-    elif confirm == 'Y':  # Enter real light on experiment
+    elif confirm == 'Y' or confirm == 'y':  # Enter real light on experiment
         isTest = 0
         lighton(interval, csv_file, isTest)
         break
-    elif confirm == 'AO':  # Open all LED
+    elif confirm == 'AO' or confirm == 'ao':  # Open all LED
         ser.write('&ALL_1000_S#'.encode())
         confirm = ''
-    elif confirm == 'AC':  # Close all LED
+    elif confirm == 'AC' or confirm == 'ac' :  # Close all LED
         ser.write('&ALL_0000_S#'.encode())
         confirm =''
-    elif confirm == 'Q': # End programe
+    elif confirm == 'Q' or confirm == 'q': # End programe
         print('Exit programm now...')
         sys.exit()
     else:
@@ -200,10 +203,15 @@ while( True ):
 
 #ser.write('&SCH_0300_0300_0900_1200_1500_1800_2100_2400_2700_3000_3300_3600_0000_0600_0900_1200_1500_1800_2100_2400_2700_3000_3300_3600_S#'.encode())
 
-
+print("\n########################################################################")
+ser.write('&ALL_0000_S#'.encode())
 
 log_file.write('LIGHT ON stop at %s'%(time.strftime("%Y%m%d-%H", time.localtime())))
-data.close()
 config_file.close()
 log_file.close()
+
+isclose = input("All task are done and all LED are closed, please type any key to exit: ")
+print("Exit programe now ...")
+
+
 
