@@ -6,6 +6,7 @@ Light on control code
 | 2.1     | optimal user control interface, fix serial_port config saving bug
           | store log file in direction, add time interval setting up
 | 2.2     | close all led and hold terimal at the end @hf 1.31
+| 2.2.1   | print running time to log file @hf 3.23
 '''
 
 import serial
@@ -33,10 +34,10 @@ log_dirs = 'light-on-ctrl-log'
     
 log_time = time.strftime("%Y%m%d-%H%M", time.localtime())
 try:
-    log_file = open(log_dirs+'/'+'light-on-ctrl'+log_time+'.log', 'w+')
+    log_file = open(log_dirs+'/'+'light-on-ctrl'+log_time+'.log', 'w+', buffering = 1)
 except:
     os.mkdir(log_dirs)
-    log_file = open(log_dirs+'/'+'light-on-ctrl'+log_time+'.log', 'w+')
+    log_file = open(log_dirs+'/'+'light-on-ctrl'+log_time+'.log', 'w+', buffering = 1)
 log_file.write('# Here are log of LIGHT ON experiment\n')
 
 ################################Load Serial from File#################################
@@ -44,7 +45,7 @@ serial_port = '/dev/ttyUSB0'
 try:
     config_file = open('light-on-ctrl.config', 'r+')
 except IOError:
-    config_file = open('light-on-ctrl.config', 'w') 
+    config_file = open('light-on-ctrl.config', 'w', buffering = 1) 
     config_file.write('# Here are hardware configure, please use # to commit\n')
     config_file.write('# Only choose last one config\n')
 
@@ -74,7 +75,7 @@ def lighton(interval_, csv_file, isTest):
     log_file.write('Interval: %d'%interval+'s'+'\n')
     total_time = total_line*interval_/3600
     print('  Total Time:', total_time, 'hrs')
-    log_file.write('Total Time: %d'%total_time + 'hrs')
+    log_file.write('Total Time: %0.3f'%total_time + 'hrs\n')
     if isTest:
         print("  During test model, only flash  5s every time in 2min")
         interval_ = 5
@@ -109,8 +110,11 @@ def lighton(interval_, csv_file, isTest):
                     line = line.strip()
                     sentence = command%(tuple([i.zfill(4) for i in line.split(",")]))
                     print(tuple([i.zfill(4) for i in line.split(",")]))
-                    if count*interval_/60%10== 0:
+                    if count*interval_/60%5== 0:
                         print(count*interval_/3600, 'hrs in', total_time, 'hrs')
+                        runned_time = count*interval_/3600
+                        log_file.write('Lignt %0.3f hrs\n'%runned_time)
+                        #log_file.write("test\n")
                     if isTest:
                         print((count-1)*interval_, 's in 2min')
     data.close()
