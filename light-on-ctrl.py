@@ -7,6 +7,7 @@ Light on control code
           | store log file in direction, add time interval setting up
 | 2.2     | close all led and hold terimal at the end @hf 1.31
 | 2.2.1   | print running time to log file @hf 3.23
+| 2.2.2   | enable interval be float instead of int @20190516 HF
 '''
 
 import serial
@@ -110,6 +111,7 @@ def lighton(interval_, csv_file, isTest):
                     line = line.strip()
                     sentence = command%(tuple([i.zfill(4) for i in line.split(",")]))
                     print(tuple([i.zfill(4) for i in line.split(",")]))
+                    #print(time.time())
                     if count*interval_/60%5== 0:
                         print(count*interval_/3600, 'hrs in', total_time, 'hrs')
                         runned_time = count*interval_/3600
@@ -152,7 +154,8 @@ while( True ):
                 confirm = 'S'
             else:
                 confirm = 'Q'
-    elif confirm == 'C' or confirm == 'c': # Choose CSV file
+    # Choose CSV File
+    elif confirm == 'C' or confirm == 'c':
         root = Tk()
         root.withdraw()
         root.csv_file =  filedialog.askopenfilename(
@@ -170,8 +173,10 @@ while( True ):
             print('load CSV succefully:' + csv_file)
             
             confirm = 'I'
+    # Set Interval
     elif confirm == 'I' or confirm == 'i':
-        interval_temp = int(input('Please type interval(1s~120s, no unit): '))
+        #interval_temp = int(input('Please type interval(1s~120s, no unit): '))
+        interval_temp = float(input('Please type interval(1s~120s, interger or float, no unit): '))
         if interval_temp < 1:
             interval = 1
         elif interval_temp > 120:
