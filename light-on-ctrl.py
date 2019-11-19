@@ -8,6 +8,7 @@ Light on control code
 | 2.2     | close all led and hold terimal at the end @hf 1.31
 | 2.2.1   | print running time to log file @hf 3.23
 | 2.2.2   | enable interval be float instead of int @20190516 HF
+| 2.2.3   | low cpu usage by add 1ms sleep in main loop 20191119 HF
 '''
 
 import serial
@@ -59,7 +60,7 @@ else:
             # Todo: add other case
         config_line = config_file.readline()
 
-###############################LIGHTON Function########################################
+#############################  LIGHTON Function  ###############################
 ## LIGHT ON control flow handler
 def lighton(interval_, csv_file, isTest):
     data = open(csv_file, "r")
@@ -82,7 +83,8 @@ def lighton(interval_, csv_file, isTest):
         interval_ = 5
     print('--------------------------------------------------------\n')
 
-    log_file.write('LIHGT ON begin in %s'%(time.strftime("%Y%m%d-%H", time.localtime())))
+    log_file.write('LIHGT ON begin in %s'%(time.strftime("%Y%m%d-%H", 
+        time.localtime())))
     start_time = time.time()
     last_time = start_time
     line = data.readline()
@@ -98,7 +100,7 @@ def lighton(interval_, csv_file, isTest):
         isread = 0
         while(time.time()- last_time < interval_):
             if(isread == 0):
-                if isTest and (time.time()-start_time > 2*60 ):
+                if isTest and (time.time() - start_time > 2*60 ):
                     isCountinue = 0
                     break
                 line = data.readline()
@@ -109,7 +111,8 @@ def lighton(interval_, csv_file, isTest):
                 else:
                     isread = 1
                     line = line.strip()
-                    sentence = command%(tuple([i.zfill(4) for i in line.split(",")]))
+                    sentence = command%(tuple([i.zfill(4) 
+                        for i in line.split(",")]))
                     print(tuple([i.zfill(4) for i in line.split(",")]))
                     #print(time.time())
                     if count*interval_/60%5== 0:
@@ -119,10 +122,12 @@ def lighton(interval_, csv_file, isTest):
                         #log_file.write("test\n")
                     if isTest:
                         print((count-1)*interval_, 's in 2min')
+            time.sleep(0.001) # sleep 1ms to low cpu usage 20191119 @HF
+    # close csv file
     data.close()
 
 
-################################User Interface#############################################
+############################## User Interface ##################################
 confirm = 'S'
 while( True ):
     if confirm == 'S' or confirm == 's':  # Configure Serial port
