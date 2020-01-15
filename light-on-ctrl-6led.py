@@ -1,4 +1,3 @@
-#!/bin/python3
 '''
 Light on control code
 | Version | Commit
@@ -10,7 +9,6 @@ Light on control code
 | 2.2.1   | print running time to log file @hf 3.23
 | 2.2.2   | enable interval be float instead of int @20190516 HF
 | 2.2.3   | low cpu usage by add 1ms sleep in main loop 20191119 HF
-| 2.3     | Add support for 6 channel LED
 '''
 
 import serial
@@ -68,7 +66,7 @@ def lighton(interval_, csv_file, isTest):
     data = open(csv_file, "r")
     #interval = 60 #second
     #command = '&SCH'+'_%s'*24+'_S#'
-    #command = '&SCH'+'_%s'*6+'_S#' # for 6 channel mainboard
+    command = '&SCH'+'_%s'*6+'_S#' # for 6 channel mainboard
     count = 0
     test_duration = 60 #min
     print('\n--------------------Parameters--------------------------')
@@ -92,8 +90,6 @@ def lighton(interval_, csv_file, isTest):
     last_time = start_time
     line = data.readline()
     line = line.strip()
-    command_len = len(line.split(","))
-    command = '&SCH'+'_%s'*command_len+'_S#' # for 6 channel mainboard
     sentence = command%(tuple([i.zfill(4) for i in line.split(",")]))
     print(tuple([i.zfill(4) for i in line.split(",")]))
     isread = 0
