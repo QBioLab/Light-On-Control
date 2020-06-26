@@ -11,7 +11,8 @@ Light on control code
 | 2.2.2   | enable interval be float instead of int @20190516 HF
 | 2.2.3   | low cpu usage by add 1ms sleep in main loop 20191119 HF
 | 2.3     | Add support for 6 channel LED @2020015 HF
-| 2.4     | Load csv file once instead of read on fly
+| 2.4     | Load csv file once instead of read each time @20200626 HF
+| 2.4.1   | Catch exception of lighton function @20200626 HF
 '''
 
 import serial
