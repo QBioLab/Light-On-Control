@@ -187,7 +187,10 @@ while( True ):
         confirm = ''
     elif confirm == 'Y' or confirm == 'y':  # Enter real light on experiment
         isTest = 0
-        lighton(interval, csv_file, isTest)
+        try:
+            lighton(interval, csv_file, isTest)
+        except:
+            log_file.write('Unexpected error: %s'%(sys.exc_info()[0]))
         break
     elif confirm == 'AO' or confirm == 'ao':  # Open all LED
         ser.write('&ALL_1000_S#'.encode())
