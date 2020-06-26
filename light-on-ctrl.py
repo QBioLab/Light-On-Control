@@ -10,7 +10,8 @@ Light on control code
 | 2.2.1   | print running time to log file @hf 3.23
 | 2.2.2   | enable interval be float instead of int @20190516 HF
 | 2.2.3   | low cpu usage by add 1ms sleep in main loop 20191119 HF
-| 2.3     | Add support for 6 channel LED
+| 2.3     | Add support for 6 channel LED @2020015 HF
+| 2.4     | Load csv file once instead of read on fly
 '''
 
 import serial
@@ -65,8 +66,8 @@ else:
 #############################  LIGHTON Function  ###############################
 ## LIGHT ON control flow handler
 def lighton(interval_, csv_file, isTest):
-    data = open(csv_file, "r")
-    #interval = 60 #second
+    with open(csv_file, "r") as data_file:
+        data = data_file.readlines()
     #command = '&SCH'+'_%s'*24+'_S#'
     #command = '&SCH'+'_%s'*6+'_S#' # for 6 channel mainboard
     count = 0
@@ -90,47 +91,32 @@ def lighton(interval_, csv_file, isTest):
         time.localtime())))
     start_time = time.time()
     last_time = start_time
-    line = data.readline()
-    line = line.strip()
+    #TODO: add support for tab as seprator
+    line = data[0].strip()
     command_len = len(line.split(","))
-    command = '&SCH'+'_%s'*command_len+'_S#' # for 6 channel mainboard
+    command = '&SCH'+'_%s'*command_len+'_S#' # detect 6 or 24 channel board
     sentence = command%(tuple([i.zfill(4) for i in line.split(",")]))
     print(tuple([i.zfill(4) for i in line.split(",")]))
-    isread = 0
-    isCountinue = 1
-    while( isCountinue ):
+    for i in range(1, len(data)):
         ser.write(sentence.encode())
         last_time = time.time()
-        count += 1
-        isread = 0
-        while(time.time()- last_time < interval_):
-            if(isread == 0):
-                if isTest and (time.time() - start_time > 2*60 ):
-                    isCountinue = 0
-                    break
-                line = data.readline()
-                if line == '':
-                    isCountinue = 0
-                    break;
-                    #sys.exit()
-                else:
-                    isread = 1
-                    line = line.strip()
-                    sentence = command%(tuple([i.zfill(4) 
-                        for i in line.split(",")]))
-                    print(tuple([i.zfill(4) for i in line.split(",")]))
-                    #print(time.time())
-                    if count*interval_/60%5== 0:
-                        print(count*interval_/3600, 'hrs in', total_time, 'hrs')
-                        runned_time = count*interval_/3600
-                        log_file.write('Lignt %0.3f hrs\n'%runned_time)
-                        #log_file.write("test\n")
-                    if isTest:
-                        print((count-1)*interval_, 's in 2min')
-            time.sleep(0.001) # sleep 1ms to low cpu usage 20191119 @HF
-    # close csv file
-    data.close()
 
+        if isTest and (time.time() - start_time > 2*60 ):
+            isContinue = 0 # Only run 2 min in test mode
+            break # Exit loop after test
+
+        line = data[i].strip()
+        sentence = command%(tuple([i.zfill(4) for i in line.split(",")]))
+        print(tuple([i.zfill(4) for i in line.split(",")]))
+        # print current time each 5 min
+        if i*interval_/60%5== 0:
+            print(i*interval_/3600, 'hrs in', total_time, 'hrs')
+            ran_time = i*interval_/3600
+            log_file.write('Lignt %0.3f hrs\n'%ran_time)
+            if isTest:
+                print((i-1)*interval_, 's in 2min')
+        while(time.time()- last_time < interval_):
+            time.sleep(0.001) # sleep 1ms to low cpu usage 20191119 @HF
 
 ############################## User Interface ##################################
 confirm = 'S'
