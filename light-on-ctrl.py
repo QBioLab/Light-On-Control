@@ -13,6 +13,7 @@ Light on control code
 | 2.3     | Add support for 6 channel LED @2020015 HF
 | 2.4     | Load csv file once instead of read each time @20200626 HF
 | 2.4.1   | Catch exception of lighton function @20200626 HF
+| 2.4.2   | Print finish time stamp at the end @2020707 HF
 '''
 
 import serial
@@ -220,7 +221,7 @@ config_file.close()
 log_file.close()
 
 isclose = input("All task are done and all LED are closed, please type any key to exit: ")
+print('LIGHT ON stop at %s'%(time.strftime("%Y%m%d-%H", time.localtime())))
 print("Exit programe now ...")
-
 
 
