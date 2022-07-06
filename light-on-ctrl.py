@@ -1,4 +1,3 @@
-#!/bin/python3
 '''
 Light on control code
 | Version | Commit
