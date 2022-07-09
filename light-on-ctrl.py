@@ -53,7 +53,7 @@ try:
 except IOError:
     config_file = open('light-on-ctrl.config', 'w', buffering = 1) 
     config_file.write('# Here are hardware configure, please use # to commit\n')
-    config_file.write('# Only choose last one config\n')
+    config_file.write('# Only choose bottom one config\n')
 
 else:
     config_line = config_file.readline()
@@ -119,6 +119,23 @@ def lighton(interval_, csv_file, isTest):
         while(time.time()- last_time < interval_):
             time.sleep(0.001) # sleep 1ms to low cpu usage 20191119 @HF
 
+def wait_til_time(set_clock):
+
+	print("Light will be open at time ")
+	while True:
+	now = time.strftime("%H:%M", time.localtime())
+	if now == "08:00" and illumination == "Off":
+		illumination = "On"
+		#print(illumination)
+        print("Turn on at", now)
+        on()
+    if now == "20:00" and illumination == "On":
+        illumination = "Off"
+        off()
+        print("Turn off at", now)
+        time.sleep(1)# refresh time 1s
+
+
 ############################## User Interface ##################################
 confirm = 'S'
 while( True ):
@@ -168,7 +185,6 @@ while( True ):
             total_line = len(csv_file_test.readlines())
             #Todo: row number error handling
             print('load CSV succefully:' + csv_file)
-            
             confirm = 'I'
     # Set Interval
     elif confirm == 'I' or confirm == 'i':
@@ -181,7 +197,10 @@ while( True ):
         else:
             interval = interval_temp
         confirm = ''
-
+	elif confim == 'S' or confirm = 's':
+		watchdog()
+		confim = 'Y'
+		print()
     elif confirm == 'T' or confirm == 't': # Test model
         isTest = 1
         lighton(interval, csv_file, isTest)
@@ -207,7 +226,9 @@ while( True ):
             'Type Y(es) to start'+
             '; T(est) to test CSV sequence; C(SV) to rechoose CSV file;\n'+
             'AC(all close) to all LED; AO(all open) to open all LED to 1000\n'+
-            'type Q to restart\n(Y/T/C/Q/AC/AO): ')
+            'type Q to restart\n'+
+			' S(et) to set start time\n'+
+			'(Y/T/C/Q/AC/AO/S): ')
 
 
 #ser.write('&SCH_0300_0300_0900_1200_1500_1800_2100_2400_2700_3000_3300_3600_0000_0600_0900_1200_1500_1800_2100_2400_2700_3000_3300_3600_S#'.encode())
