@@ -13,6 +13,7 @@ Light on control code
 | 2.4     | Load csv file once instead of read each time @20200626 HF
 | 2.4.1   | Catch exception of lighton function @20200626 HF
 | 2.4.2   | Print finish time stamp at the end @2020707 HF
+| 2.4.3   | add timer 20220711@hf,chendu
 '''
 
 import serial
@@ -190,7 +191,7 @@ while( True ):
         else:
             interval = interval_temp
         confirm = ''
-    elif confim == 'G' or confirm == 'g':
+    elif confirm == 'G' or confirm == 'g':
         # wait until the time is reached
         wait_til_time()
         confim = 'Y'
