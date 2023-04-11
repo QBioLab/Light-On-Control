@@ -96,9 +96,10 @@ def lighton(interval_, csv_file, isTest):
     #TODO: add support for tab as seprator
     line = data[0].strip()
     command_len = len(line.split(","))
-    command = '&SCH'+'_%s'*command_len+'_S#' # detect 6 or 24 channel board
-    sentence = command%(tuple([i.zfill(4) for i in line.split(",")]))
-    print(tuple([i.zfill(4) for i in line.split(",")]))
+    code_len = 5
+    command = '&SCH'+'_%s'*command_len+'_N#' # detect 6 or 24 channel board
+    sentence = command%(tuple([i.zfill(code_len) for i in line.split(",")]))
+    print(tuple([i.zfill(code_len) for i in line.split(",")]))
     for i in range(1, len(data)):
         ser.write(sentence.encode())
         last_time = time.time()
@@ -108,8 +109,8 @@ def lighton(interval_, csv_file, isTest):
             break # Exit loop after test
 
         line = data[i].strip()
-        sentence = command%(tuple([i.zfill(4) for i in line.split(",")]))
-        print(tuple([i.zfill(4) for i in line.split(",")]))
+        sentence = command%(tuple([i.zfill(code_len) for i in line.split(",")]))
+        print(tuple([i.zfill(code_len) for i in line.split(",")]))
         # print current time each 5 min
         if i*interval_/60%5== 0:
             print(i*interval_/3600, 'hrs in', total_time, 'hrs')
@@ -121,10 +122,10 @@ def lighton(interval_, csv_file, isTest):
             time.sleep(0.001) # sleep 1ms to low cpu usage 20191119 @HF
 
 def wait_til_time():
-    print("Light will be open at time at 3:00AM")
+    print("Light will be open at time at 2:00AM")
     while True:
         now = time.strftime("%H:%M", time.localtime())
-        if now == "03:00" :
+        if now == "02:00" :
             print("Turn on at", now)
             time.sleep(2)# refresh time 1s
             break
@@ -194,7 +195,7 @@ while( True ):
     elif confirm == 'G' or confirm == 'g':
         # wait until the time is reached
         wait_til_time()
-        confim = 'Y'
+        confirm = 'Y'
         print()
     elif confirm == 'T' or confirm == 't': # Test model
         isTest = 1
@@ -222,7 +223,7 @@ while( True ):
             '; T(est) to test CSV sequence; C(SV) to rechoose CSV file;\n'+
             'AC(all close) to all LED; AO(all open) to open all LED to 1000\n'+
             'type Q to restart\n'+
-            ' Type G to start light at 3:00AM \n'+
+            ' Type G to start light at 2:00AM \n'+
             '(Y/T/C/Q/AC/AO/S/G): ')
 
 
